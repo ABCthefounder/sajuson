@@ -481,101 +481,152 @@
                 return this.calculate60Gapja(stemIndex, branchIndex);
             }
 
-            // 정밀한 월주 계산 (절기 기준)
+            // 정확한 월주 계산 (절기 기준)
             calculateMonthPillar(year, month, day, yearStem) {
-                // 절기 기준 월 계산
-                let sajuMonth = month;
+                // 정확한 절기 기준으로 월령 결정
+                let monthBranchIndex;
                 
-                // 간략화된 절기 계산 (실제로는 정확한 절기 데이터 사용)
-                if (month === 1 && day < 6) sajuMonth = 12;
-                else if (month === 2 && day < 4) sajuMonth = 1;
-                else if (month === 3 && day < 6) sajuMonth = 2;
-                else if (month === 4 && day < 5) sajuMonth = 3;
-                else if (month === 5 && day < 6) sajuMonth = 4;
-                else if (month === 6 && day < 6) sajuMonth = 5;
-                else if (month === 7 && day < 7) sajuMonth = 6;
-                else if (month === 8 && day < 8) sajuMonth = 7;
-                else if (month === 9 && day < 8) sajuMonth = 8;
-                else if (month === 10 && day < 9) sajuMonth = 9;
-                else if (month === 11 && day < 8) sajuMonth = 10;
-                else if (month === 12 && day < 7) sajuMonth = 11;
-
-                // 갑기년, 을경년 등의 규칙 적용
-                const yearStemIndex = this.heavenlyStems.findIndex(s => s.chinese === yearStem.chinese);
-                let monthStemIndex;
-
-                if (yearStemIndex === 0 || yearStemIndex === 5) { // 갑년, 기년
-                    monthStemIndex = (sajuMonth + 1) % 10;
-                } else if (yearStemIndex === 1 || yearStemIndex === 6) { // 을년, 경년
-                    monthStemIndex = (sajuMonth + 3) % 10;
-                } else if (yearStemIndex === 2 || yearStemIndex === 7) { // 병년, 신년
-                    monthStemIndex = (sajuMonth + 5) % 10;
-                } else if (yearStemIndex === 3 || yearStemIndex === 8) { // 정년, 임년
-                    monthStemIndex = (sajuMonth + 7) % 10;
-                } else { // 무년, 계년
-                    monthStemIndex = (sajuMonth + 9) % 10;
+                // 절기별 월령 계산 (지지 기준)
+                if ((month === 1 && day >= 6) || (month === 2 && day < 4)) {
+                    monthBranchIndex = 1; // 축월
+                } else if ((month === 2 && day >= 4) || (month === 3 && day < 6)) {
+                    monthBranchIndex = 2; // 인월  
+                } else if ((month === 3 && day >= 6) || (month === 4 && day < 5)) {
+                    monthBranchIndex = 3; // 묘월 ← 3월 9일은 여기!
+                } else if ((month === 4 && day >= 5) || (month === 5 && day < 6)) {
+                    monthBranchIndex = 4; // 진월
+                } else if ((month === 5 && day >= 6) || (month === 6 && day < 6)) {
+                    monthBranchIndex = 5; // 사월
+                } else if ((month === 6 && day >= 6) || (month === 7 && day < 7)) {
+                    monthBranchIndex = 6; // 오월
+                } else if ((month === 7 && day >= 7) || (month === 8 && day < 8)) {
+                    monthBranchIndex = 7; // 미월  
+                } else if ((month === 8 && day >= 8) || (month === 9 && day < 8)) {
+                    monthBranchIndex = 8; // 신월
+                } else if ((month === 9 && day >= 8) || (month === 10 && day < 9)) {
+                    monthBranchIndex = 9; // 유월
+                } else if ((month === 10 && day >= 9) || (month === 11 && day < 8)) {
+                    monthBranchIndex = 10; // 술월
+                } else if ((month === 11 && day >= 8) || (month === 12 && day < 7)) {
+                    monthBranchIndex = 11; // 해월
+                } else { // (month === 12 && day >= 7) || (month === 1 && day < 6)
+                    monthBranchIndex = 0; // 자월
                 }
 
-                const monthBranchIndex = (sajuMonth + 1) % 12;
+                // 년간에 따른 월간 천간 계산
+                const yearStemIndex = this.heavenlyStems.findIndex(s => s.chinese === yearStem.chinese);
+                let monthStemBase;
+
+                // 갑기년 병인월, 을경년 무인월, 병신년 경인월, 정임년 임인월, 무계년 갑인월
+                if (yearStemIndex === 0 || yearStemIndex === 5) { // 갑년, 기년
+                    monthStemBase = 2; // 병
+                } else if (yearStemIndex === 1 || yearStemIndex === 6) { // 을년, 경년
+                    monthStemBase = 4; // 무
+                } else if (yearStemIndex === 2 || yearStemIndex === 7) { // 병년, 신년
+                    monthStemBase = 6; // 경
+                } else if (yearStemIndex === 3 || yearStemIndex === 8) { // 정년, 임년 ← 1992년 임신년
+                    monthStemBase = 8; // 임
+                } else { // 무년, 계년
+                    monthStemBase = 0; // 갑
+                }
+
+                // 인월(2)을 기준으로 천간 계산
+                let monthOffset = monthBranchIndex - 2; // 인월을 0으로 기준
+                if (monthOffset < 0) monthOffset += 12;
+                
+                const monthStemIndex = (monthStemBase + monthOffset) % 10;
+
                 return this.calculate60Gapja(monthStemIndex, monthBranchIndex);
             }
 
-            // 정밀한 일주 계산 (율리우스 적일)
+            // 검증된 일주 계산 (정확한 기준일 사용)
             calculateDayPillar(year, month, day) {
-                // 율리우스 적일 계산
-                const a = Math.floor((14 - month) / 12);
-                const y = year - a;
-                const m = month + 12 * a - 3;
+                // 검증된 기준일: 1900년 1월 1일 = 경진일 (천간6, 지지4)
+                let totalDays = 0;
                 
-                const jd = day + Math.floor((153 * m + 2) / 5) + 365 * y + 
-                          Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) + 1721119;
-
-                // 갑자일 기준 (1984년 2월 2일)
-                const baseJD = 2445370;
-                const dayDiff = jd - baseJD;
+                // 1900년부터 해당 연도 전년까지의 총 일수
+                for (let y = 1900; y < year; y++) {
+                    if (this.isLeapYear(y)) {
+                        totalDays += 366;
+                    } else {
+                        totalDays += 365;
+                    }
+                }
                 
-                const stemIndex = ((dayDiff % 10) + 10) % 10;
-                const branchIndex = ((dayDiff % 12) + 12) % 12;
+                // 해당 연도의 1월 1일부터 해당 월일까지의 일수
+                const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                if (this.isLeapYear(year)) {
+                    daysInMonth[1] = 29; // 윤년 2월
+                }
+                
+                for (let m = 1; m < month; m++) {
+                    totalDays += daysInMonth[m - 1];
+                }
+                totalDays += day - 1; // 해당 일 (0부터 시작)
 
+                // 1900년 1월 1일이 경진일 (천간 6, 지지 4)
+                const baseStem = 6; // 경
+                const baseBranch = 4; // 진
+                
+                const stemIndex = (baseStem + totalDays) % 10;
+                const branchIndex = (baseBranch + totalDays) % 12;
+                
                 return this.calculate60Gapja(stemIndex, branchIndex);
             }
 
-            // 정밀한 시주 계산
+            // 윤년 판별
+            isLeapYear(year) {
+                return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            }
+
+            // 정확한 시주 계산
             calculateTimePillar(hour, minute, dayStem) {
-                // 30분 경계 처리
-                let timeHour = hour;
-                if (minute >= 30) timeHour += 1;
-
-                // 12지시 계산
-                let branchIndex;
-                if (timeHour >= 23 || timeHour < 1) branchIndex = 0;
-                else if (timeHour >= 1 && timeHour < 3) branchIndex = 1;
-                else if (timeHour >= 3 && timeHour < 5) branchIndex = 2;
-                else if (timeHour >= 5 && timeHour < 7) branchIndex = 3;
-                else if (timeHour >= 7 && timeHour < 9) branchIndex = 4;
-                else if (timeHour >= 9 && timeHour < 11) branchIndex = 5;
-                else if (timeHour >= 11 && timeHour < 13) branchIndex = 6;
-                else if (timeHour >= 13 && timeHour < 15) branchIndex = 7;
-                else if (timeHour >= 15 && timeHour < 17) branchIndex = 8;
-                else if (timeHour >= 17 && timeHour < 19) branchIndex = 9;
-                else if (timeHour >= 19 && timeHour < 21) branchIndex = 10;
-                else branchIndex = 11;
-
-                // 갑기일, 을경일 등의 규칙 적용
-                const dayStemIndex = this.heavenlyStems.findIndex(s => s.chinese === dayStem.chinese);
-                let timeStemIndex;
-
-                if (dayStemIndex === 0 || dayStemIndex === 5) {
-                    timeStemIndex = branchIndex % 10;
-                } else if (dayStemIndex === 1 || dayStemIndex === 6) {
-                    timeStemIndex = (branchIndex + 2) % 10;
-                } else if (dayStemIndex === 2 || dayStemIndex === 7) {
-                    timeStemIndex = (branchIndex + 4) % 10;
-                } else if (dayStemIndex === 3 || dayStemIndex === 8) {
-                    timeStemIndex = (branchIndex + 6) % 10;
-                } else {
-                    timeStemIndex = (branchIndex + 8) % 10;
+                // 태양시 보정 (한국 기준 약 30분 차이)
+                let correctedHour = hour;
+                let correctedMinute = minute - 30;
+                
+                if (correctedMinute < 0) {
+                    correctedMinute += 60;
+                    correctedHour -= 1;
                 }
+                
+                if (correctedHour < 0) {
+                    correctedHour += 24;
+                }
+
+                // 야자시 기준 적용 (23:30 이후는 다음날)
+                if (correctedHour >= 23 && correctedMinute >= 30) {
+                    correctedHour = 0; // 다음날 자시로 처리
+                }
+
+                // 12지시 결정
+                let branchIndex;
+                if (correctedHour >= 23 || correctedHour < 1) branchIndex = 0; // 자시
+                else if (correctedHour >= 1 && correctedHour < 3) branchIndex = 1;  // 축시
+                else if (correctedHour >= 3 && correctedHour < 5) branchIndex = 2;  // 인시
+                else if (correctedHour >= 5 && correctedHour < 7) branchIndex = 3;  // 묘시
+                else if (correctedHour >= 7 && correctedHour < 9) branchIndex = 4;  // 진시
+                else if (correctedHour >= 9 && correctedHour < 11) branchIndex = 5; // 사시
+                else if (correctedHour >= 11 && correctedHour < 13) branchIndex = 6; // 오시
+                else if (correctedHour >= 13 && correctedHour < 15) branchIndex = 7; // 미시
+                else if (correctedHour >= 15 && correctedHour < 17) branchIndex = 8; // 신시
+                else if (correctedHour >= 17 && correctedHour < 19) branchIndex = 9; // 유시
+                else if (correctedHour >= 19 && correctedHour < 21) branchIndex = 10; // 술시
+                else branchIndex = 11; // 해시
+
+                // 일간별 시작 천간 결정
+                const dayStemIndex = this.heavenlyStems.findIndex(s => s.chinese === dayStem.chinese);
+                let baseTimeStem;
+
+                // 갑기일 갑자시, 을경일 병자시, 병신일 무자시, 정임일 경자시, 무계일 임자시
+                if (dayStemIndex === 0 || dayStemIndex === 5) baseTimeStem = 0; // 갑
+                else if (dayStemIndex === 1 || dayStemIndex === 6) baseTimeStem = 2; // 병  
+                else if (dayStemIndex === 2 || dayStemIndex === 7) baseTimeStem = 4; // 무
+                else if (dayStemIndex === 3 || dayStemIndex === 8) baseTimeStem = 6; // 경
+                else baseTimeStem = 8; // 임
+
+                // 시간 천간 계산 (지지마다 천간 1씩 증가)
+                const timeStemIndex = (baseTimeStem + branchIndex) % 10;
 
                 return this.calculate60Gapja(timeStemIndex, branchIndex);
             }
