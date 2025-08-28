@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정밀 만세력 사주 플랫폼</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      padding: 2rem 3rem;
+      text-align: center;
+      min-width: 350px;
+    }
+    .input-row { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.3rem; font-weight: bold;}
+    input, select {
+      width: 100%; padding: 0.5rem;
+      border: 1px solid #eee; border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      background: #667eea; color: #fff;
+      font-weight: 700; font-size: 1.1rem;
+      border: none; padding: 0.7rem 2rem;
+      border-radius: 10px; margin-top: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      cursor: pointer;
+    }
+    .result { margin-top: 2rem; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>정밀 만세력 사주 플랫폼</h1>
+    <form id="sajuForm">
+      <div class="input-row">
+        <label for="name">이름</label>
+        <input type="text" id="name" required maxlength="12">
+      </div>
+      <div class="input-row">
+        <label>성별</label>
+        <select id="gender">
+          <option value="여자">여자</option>
+          <option value="남자">남자</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="birthdate">생년월일</label>
+        <input type="date" id="birthdate" required>
+      </div>
+      <div class="input-row">
+        <label for="birthtime">시간</label>
+        <input type="time" id="birthtime" required>
+      </div>
+      <div class="input-row">
+        <label for="calendar">양력/음력</label>
+        <select id="calendar">
+          <option value="양력">양력</option>
+          <option value="음력">음력</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label for="city">도시</label>
+        <input type="text" id="city" required>
+      </div>
+      <button type="submit">만세력 결과 보기</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
+  <script>
+    document.getElementById('sajuForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // 간단한 결과 예시 (실제 만세력 계산 로직은 별도 함수 필요)
+      const name = document.getElementById('name').value;
+      const gender = document.getElementById('gender').value;
+      const birthdate = document.getElementById('birthdate').value;
+      const birthtime = document.getElementById('birthtime').value;
+      const calendar = document.getElementById('calendar').value;
+      const city = document.getElementById('city').value;
+      document.getElementById('result').innerHTML =
+        `<b>${name}</b>님의 사주 정보<br>
+        성별: ${gender}<br>
+        생년월일: ${birthdate} ${birthtime}<br>
+        양력/음력: ${calendar}<br>
+        도시: ${city}<br>
+        <br>
+        <span style="color:#667eea">[여기에 만세력 분석 결과를 표시]</span>`;
+    });
+  </script>
+</body>
+</html>
